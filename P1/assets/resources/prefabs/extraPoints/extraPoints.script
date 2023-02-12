@@ -1,0 +1,76 @@
+
+-- Unas property aquí por que las pide el enunciado, pero está bien, para testeo 
+go.property("point_time", 3)
+go.property("alive_time", 10)
+go.property("speed", 75)
+go.property("arrive_distance", 1)
+
+-- Init
+function init(self)
+	-- Temporales de tiempo
+	self.time = 0
+	self.total_time = 0
+
+	-- Temporales de posicion
+	self.position = vmath.vector3(math.random(screen_w), math.random(screen_h), 1)
+	self.destiny = vmath.vector3()
+	self.direction = vmath.vector3()
+
+	-- Establecemos destino
+	changeDestiny(self)
+	
+	-- Play de sonido
+	sound.play("#sfxSpawn")
+end
+
+-- Update
+function update(self, dt)
+
+	-- Update del tiempo
+	self.time = self.time + dt
+	self.total_time = self.total_time + dt
+
+	-- Movemos el objeto y check si llego al destino
+	if move(self, dt) then
+		changeDestiny(self)
+	end
+
+	-- Comprobamos si tenemos qeu sumar puntos
+	checkPointTime(self)
+
+	-- Comprobamos si vamos a seguir "alive"
+	checkAlive(self)
+	
+end
+
+-- Método para mover el objeto
+-- @return bool -> true si ha llegado al destino
+function move(self, dt)
+	self.position = self.position + (self.speed * dt * self.direction)
+	go.set_position(self.position)
+	return vmath.length(self.position - self.destiny) < self.arrive_distance
+end
+
+-- Método para comprobar si toca sumar puntos
+function checkPointTime(self)
+	if (self.time >= self.point_time) then
+		self.time = 0
+		-- avisamos al gameMananger para sumar puntos
+		msg.post("gameManager#gameManager", "addPoint")
+	end
+end
+
+-- Método para comprobar si nos vamos al piso y palmamos
+function checkAlive(self)
+	if (self.total_time >= self.alive_time) then
+		-- Reproducimos audios de muerte y nos vamos
+		sound.play("#sfxDie")
+		go.delete()
+	end
+end
+
+-- Método para cambiar el destino al que moverse y acutalizar la dirección
+function changeDestiny(self)
+	self.destiny = vmath.vector3(math.random(screen_w), math.random(screen_h), 1)
+	self.direction = vmath.normalize(self.destiny - self.position)
+end

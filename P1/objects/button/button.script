@@ -1,0 +1,37 @@
+
+-- Init
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.radius = go.get("#sprite", hash("size")).x / 2
+end
+
+-- OnInput
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and action.pressed then
+		local clickPos = vmath.vector3(action.x, action.y, 1)
+		if checkWithRaycast(self, clickPos) then
+			onClick()
+		end
+	end
+end
+
+-- Enviamos mensaje a gameManager y ejecutamos sonido "sfxClick"
+function onClick()
+	msg.post("gameManager#gameManager", "addPoint")
+	sound.play("#sfxClick")
+end
+
+-- Método para comprobar la colision utilizando el punto de click
+-- y el radio, ya que el gráfico es circular, muy conveniente ;)
+function checkWithRadius(self, clickPos)
+	return vmath.length(clickPos - go.get_position()) < self.radius
+end
+
+-- Método para comprobar la colision con raycast del punto de click
+-- Pillar el radio ahí del gráfico por que es redondo => cutre :(
+function checkWithRaycast(self, clickPos)
+	-- devuelve un not por que cuando hacemos un raycast desde donde clicamos hasta el botton,
+	-- siempre funciona, en plan, hacemos un raycast al boton, excepto cuando estamos sobre el mismo botton, por que el 
+	-- rayo, no sale desde fuera y colisiona, no es un raycast del eje Z, sino sobre el plano XY
+	return not physics.raycast(clickPos, go.get_position(), { hash("button") })
+end

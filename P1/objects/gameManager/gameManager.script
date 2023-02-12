@@ -1,0 +1,44 @@
+
+-- Screen Size 
+screen_w = 0
+screen_h = 0
+
+-- Init
+function init(self)
+	self.clicks = 0	
+	sound.play("#backgroundMusic")
+
+	-- Tamaño del display
+	screen_w, screen_h = window.get_size()
+end
+
+-- OnMessage
+function on_message(self, message_id, message, sender)
+	if message_id == hash("addPoint") then
+		onAddPoint(self)
+	end
+end
+
+-- Método para añadir puntos y todo lo que eso conlleva
+function onAddPoint(self)
+	-- Suamos click
+	self.clicks = self.clicks + 1
+
+	-- Actualizamos el HUD
+	updateHUD(self)
+
+	-- Comprobamos para la creación de un nuevo "extraPoints"
+	local mod = self.clicks % 10
+	if mod == 0 then
+		factory.create("#extraPoints")
+	end
+
+end
+
+-- Método para actualizar el HUD
+function updateHUD(self)
+	-- string para la información
+	msg.post("canvas#canvas", "clickCount", { count = tostring(self.clicks) })
+	-- int para el valor del pie
+	msg.post("canvas#canvas", "nextSpawn", { count = self.clicks })
+end

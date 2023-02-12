@@ -1,0 +1,23 @@
+
+-- Init
+function init(self)
+	-- Text
+	self.txt_clickCount = gui.get_node("txt_clickCount")
+	-- Pie
+	self.pie_nextSpawn = gui.get_node("pie_nextSpawn")
+	self.pie_controller = { total = 360, portion = 10, pie_portion = 36 } --[[ total / portion ]]-- 
+end
+
+-- OnMessage
+function on_message(self, message_id, message, sender)
+	-- Update del texto
+	if message_id == hash("clickCount") then
+		gui.set_text(self.txt_clickCount, message.count)
+	end
+	-- Update del pie ANIMATED FINALLY
+	if message_id == hash("nextSpawn") then
+		--gui.set_fill_angle(self.pie_nextSpawn, self.pie_controller.total - (message.count % self.pie_controller.portion) * self.pie_controller.pie_portion)
+		local portion = self.pie_controller.total - (message.count % self.pie_controller.portion) * self.pie_controller.pie_portion
+		gui.animate(self.pie_nextSpawn, "fill_angle", portion, gui.EASING_OUTCIRC, 1)
+	end
+end
